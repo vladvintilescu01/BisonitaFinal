@@ -45,12 +45,28 @@ terminal String 	STRINGLITERAL;
 /* Non terminals */
 non terminal            expr_list;
 non terminal Integer    expr;      // used to store evaluated subexpressions
-
+non terminal 		program, declares, statements;
+non terminal 		declare, data_type, ident_list;
 /* Precedences */
 precedence left PLUS, MINUS;
 precedence left TIMES;
 precedence left UMINUS;
 
+program ::= PROGRAM ID SEMI declares statements ENDPROGRAM SEMI;
+
+declares := declares declare
+			| declare;
+			
+declare :: = data_type ident_list SEMI;
+
+ident_list ::= ident_list SEMI ID
+			   | ID;	  
+			
+
+data_type ::= STRING 
+			| INTEGER
+			| REAL;
+			
 /* The grammar rules */
 expr_list ::= expr_list expr:e SEMI         {: System.out.println(e); :}
             | expr:e SEMI                   {: System.out.println(e); :}

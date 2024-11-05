@@ -61,10 +61,12 @@ Number     = [0-9]+
 /* comments */
 Comment = {TraditionalComment} | {EndOfLineComment}
 TraditionalComment = "/*" {CommentContent} \*+ "/"
-EndOfLineComment = "//" [^\r\n]* {Newline}
+EndOfLineComment = "//"[^\r\n]* {Newline}
 CommentContent = ( [^*] | \*+[^*/] )*
 
 ident = ([:jletter:] | "_" ) ([:jletterdigit:] | [:jletter:] | "_" )*
+
+StringLiteral = \".*\"
 
 
 %eofval{
@@ -78,6 +80,7 @@ ident = ([:jletter:] | "_" ) ([:jletterdigit:] | [:jletter:] | "_" )*
 <YYINITIAL> {
 
   {Whitespace} {                              }
+  {EndOfLineComment} { }
   ";"          { return symbolFactory.newSymbol("SEMI", SEMI); }
   "+"          { return symbolFactory.newSymbol("PLUS", PLUS); }
   "-"          { return symbolFactory.newSymbol("MINUS", MINUS); }
@@ -116,18 +119,17 @@ ident = ([:jletter:] | "_" ) ([:jletterdigit:] | [:jletter:] | "_" )*
   "for"				{ return symbolFactory.newSymbol("FOR", FOR); }
   "to"				{ return symbolFactory.newSymbol("TO", TO); }
   "endfor"			{ return symbolFactory.newSymbol("ENDFOR", ENDFOR); }
-  "//"				{ return symbolFactory.newSymbol("COMMENT", COMMENT); }
-  ","				{ return symbolFactory.newSymbol("COMMA", COMMA); }
-  \"	     	    { return symbolFactory.newSymbol("QUOTE", QUOTE); }
+ 
+  ","				{ return symbolFactory.newSymbol("COMMA", COMMA); }  
   "read"			{ return symbolFactory.newSymbol("READ", READ); }
   "move"			{ return symbolFactory.newSymbol("MOVE", MOVE); }
-  "draw"				{ return symbolFactory.newSymbol("DRAW", DRAW); }
+  "draw"			{ return symbolFactory.newSymbol("DRAW", DRAW); }
   "write"			{ return symbolFactory.newSymbol("WRITE", WRITE); }
   "set color"		{ return symbolFactory.newSymbol("SETCOLOR", SETCOLOR); }
-  "set line"		{ return symbolFactory.newSymbol("SETLINE", SETLINE); }
-  "set color"		{ return symbolFactory.newSymbol("SETCOLOR", SETCOLOR); }
+  "set line"		{ return symbolFactory.newSymbol("SETLINE", SETLINE); }  
   {ident}			{ return symbolFactory.newSymbol("ID", ID, yytext()); }
-  {Number}     { return symbolFactory.newSymbol("NUMBER", NUMBER, Integer.parseInt(yytext())); }
+  {Number}          { return symbolFactory.newSymbol("NUMBER", NUMBER, Integer.parseInt(yytext())); }
+  {StringLiteral}   { return symbolFactory.newSymbol("STRINGLITERAL", STRINGLITERAL, yytext()); }
 }
 
 

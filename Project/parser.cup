@@ -31,7 +31,7 @@ init with {:
 scan with {: return lexer.next_token(); :};
 
 /* Terminals (tokens returned by the scanner). */
-terminal            SEMI, PLUS, MINUS, UMINUS, TIMES, DIVIDE, POW, MOD, LPAREN, RPAREN, QUOTE;
+terminal            SEMI, PLUS, MINUS, UMINUS, TIMES, DIVIDE, POW, MOD, LPAREN, RPAREN;
 terminal			EQUAL, AND, OR, NOT, NOTEQUAL, LESSER, GREATER, LESSERE, GREATERE;
 terminal 			PROGRAM, ENDPROGRAM, FUNCTION, ENDFUNCTION, RETURN, ASSIGNMENT, COMMENT, COMMA;
 terminal			READ, MOVE, DRAW, WRITE, SETCOLOR, SETLINE, CLEAR;
@@ -41,6 +41,7 @@ terminal			WHILE, DO, ENDDO;
 terminal			FOR, TO, ENDFOR;
 terminal Integer    NUMBER;        // our scanner provides numbers as integers
 terminal String		ID;
+terminal String 	STRINGLITERAL;
 /* Non terminals */
 non terminal            expr_list;
 non terminal Integer    expr;      // used to store evaluated subexpressions

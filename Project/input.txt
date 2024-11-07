@@ -1,62 +1,17 @@
-program TestAllRules;
+program MyProgram;
+integer a, b, c;
 
-  // Declarations
-  string message;
-  integer counter, limit;
-  real decimalValue;
+function integer Add(integer x, integer y);
+  integer result;
+  result := x + y;
+  return result;
+endfunction;
 
-  // Function to add two numbers
-  integer function add(integer a, integer b);
-    integer result;
-    result := a + b;
-    return result;
-  endfunction;
+a := 3 + 2;
+b := Add(a, 2);
 
-  // Function to convert real to integer
-  integer function realToInt(real r);
-    return r;
-  endfunction;
-
-  // Main program
-  begin
-    // Assignments
-    message := "Hello, Bisonita";
-    counter := 0;
-    limit := 5;
-    decimalValue := 3;
-
-    // Arithmetic expressions
-    integer sum;
-    sum := add(3, 5);
-    decimalValue := decimalValue + 2;
-    counter := realToInt(decimalValue);
-
-    // Control structures
-    if (counter = 6) then
-      write "Counter is equal to 6";
-    else
-      write "Counter is not equal to 6";
-    endif
-
-    while (counter < limit) do
-      write "Counter value";
-      write counter;
-      counter := counter + 1;
-    enddo
-
-    for counter := 1 to 3 do
-      write "Loop iteration";
-      write counter;
-    endfor
-    
-     // Window operations
-    clear;
-    set color red;
-    set line 3;
-    move 100, 100;
-    draw 200, 200;
-    write "This is a red line with width 3";
-
-  end
-
+if (a = b) and (a > 0) then
+  c := -5;
+else
+endif
 endprogram;

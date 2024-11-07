@@ -43,41 +43,108 @@ terminal Integer    NUMBER;        // our scanner provides numbers as integers
 terminal String		ID;
 terminal String 	STRINGLITERAL;
 /* Non terminals */
-non terminal            expr_list;
-non terminal Integer    expr;      // used to store evaluated subexpressions
-non terminal 		program, declares, statements;
-non terminal 		declare, data_type, ident_list;
+non terminal program, declares, statements, statement, function_decl, function_declarations;
+non terminal declare, data_type, ident_list;
+non terminal assign_stmt, if_stmt, while_stmt, for_stmt, return_stmt, io_operation;
+non terminal expr_list, param_list, params, param_list_tail, epsilon;
+non terminal Integer expr;
 /* Precedences */
+precedence left OR;
+precedence left AND;
+precedence nonassoc EQUAL, NOTEQUAL, LESSER, GREATER, LESSERE, GREATERE;
 precedence left PLUS, MINUS;
-precedence left TIMES;
-precedence left UMINUS;
+precedence left TIMES, DIVIDE, MOD;
+precedence right POW;
+precedence right UMINUS;
 
-program ::= PROGRAM ID SEMI declares statements ENDPROGRAM SEMI;
 
-declares := declares declare
+/* Program Structure */
+epsilon ::= ; 
+
+program ::= PROGRAM ID SEMI declares function_declarations statements ENDPROGRAM SEMI;
+
+function_declarations ::= function_declarations function_decl
+                         | function_decl
+                         | epsilon;
+                         
+
+function_decl ::= data_type FUNCTION ID LPAREN params RPAREN SEMI declares statements RETURN expr ENDFUNCTION SEMI;
+
+params ::= param_list
+		  | epsilon;
+         
+
+param_list ::= ID param_list_tail
+			  | epsilon;
+
+param_list_tail ::= COMMA ID param_list_tail
+				  | epsilon;
+                  
+                  
+declares ::= declares declare
 			| declare;
 			
-declare :: = data_type ident_list SEMI;
+declare ::= data_type ident_list SEMI;
 
-ident_list ::= ident_list SEMI ID
+ident_list ::= ident_list COMMA ID
 			   | ID;	  
 			
-
 data_type ::= STRING 
 			| INTEGER
 			| REAL;
+
+statements ::= statements statement
+             | statement;
+
+statement ::= assign_stmt
+            | if_stmt
+            | while_stmt
+            | for_stmt
+            | return_stmt
+            | io_operation;
 			
-/* The grammar rules */
+assign_stmt ::= ID ASSIGNMENT expr SEMI;
+               
+if_stmt ::= IF expr THEN statements ELSE statements ENDIF SEMI
+          | IF expr THEN statements ENDIF SEMI;
+          
+while_stmt ::= WHILE expr DO statements ENDDO SEMI;
+
+for_stmt ::= FOR ID ASSIGNMENT expr TO expr DO statements ENDFOR SEMI;
+
+return_stmt ::= RETURN expr SEMI;
+
+io_operation ::= READ LPAREN ID RPAREN SEMI
+               | WRITE LPAREN STRINGLITERAL RPAREN SEMI
+               | MOVE LPAREN expr COMMA expr RPAREN SEMI
+               | DRAW LPAREN expr COMMA expr RPAREN SEMI
+               | SETCOLOR LPAREN expr RPAREN SEMI
+               | SETLINE LPAREN expr RPAREN SEMI
+               | CLEAR SEMI;
+               
 expr_list ::= expr_list expr:e SEMI         {: System.out.println(e); :}
             | expr:e SEMI                   {: System.out.println(e); :}
             ;
             
-expr      ::= expr:e1 PLUS  expr:e2         {: RESULT = e1+e2;        :}
-             | expr:e1 MINUS expr:e2        {: RESULT = e1-e2;        :}
-             | expr:e1 TIMES expr:e2        {: RESULT = e1*e2;        :}
-             | MINUS expr:e                 {: RESULT = -e;           :}
-             %prec UMINUS
-             | LPAREN expr:e RPAREN	         {: RESULT = e;           :}
-             | NUMBER:n	                     {: RESULT = n;           :}
-             ;
-       
+expr ::= expr:e1 PLUS expr:e2            {: RESULT = e1 + e2;       :}
+       | expr:e1 MINUS expr:e2           {: RESULT = e1 - e2;       :}
+       | expr:e1 TIMES expr:e2           {: RESULT = e1 * e2;       :}
+       | expr:e1 DIVIDE expr:e2          {: RESULT = e1 / e2;       :}
+       | expr:e1 POW expr:e2             {: RESULT = (int) Math.pow(e1, e2); :} // Assuming e1 and e2 are cast to doubles as needed
+       | expr:e1 MOD expr:e2             {: RESULT = e1 % e2;       :} // Only for integers
+       | expr:e1 AND expr:e2             {: RESULT = (e1 != 0 && e2 != 0) ? 1 : 0; :} // Logical AND
+       | expr:e1 OR expr:e2              {: RESULT = (e1 != 0 || e2 != 0) ? 1 : 0; :} // Logical OR
+       | NOT expr:e                      {: RESULT = (e == 0) ? 1 : 0; :} // Logical NOT
+       | expr:e1 EQUAL expr:e2           {: RESULT = (e1 == e2) ? 1 : 0; :} // Relational operators
+       | expr:e1 NOTEQUAL expr:e2        {: RESULT = (e1 != e2) ? 1 : 0; :}
+       | expr:e1 LESSER expr:e2          {: RESULT = (e1 < e2) ? 1 : 0; :}
+       | expr:e1 GREATER expr:e2         {: RESULT = (e1 > e2) ? 1 : 0; :}
+       | expr:e1 LESSERE expr:e2         {: RESULT = (e1 <= e2) ? 1 : 0; :}
+       | expr:e1 GREATERE expr:e2        {: RESULT = (e1 >= e2) ? 1 : 0; :}
+       | MINUS expr:e                    {: RESULT = -e;            :} %prec UMINUS
+       | LPAREN expr:e RPAREN            {: RESULT = e;             :}
+       | NUMBER:n                        {: RESULT = n;             :}
+       | ID                              {: System.out.println("Assigned "); :}
+       ;
+
+     

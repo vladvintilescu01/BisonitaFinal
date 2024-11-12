@@ -1,17 +1,16 @@
 program MyProgram;
 integer a, b, c;
 
-function integer Add(integer x, integer y);
+integer function Add(integer x, integer y);
   integer result;
   result := x + y;
   return result;
 endfunction;
 
 a := 3 + 2;
-b := Add(a, 2);
-
 if (a = b) and (a > 0) then
   c := -5;
 else
-endif
+  c:= 6;
+endif;
 endprogram;

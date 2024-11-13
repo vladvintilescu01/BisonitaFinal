@@ -78,8 +78,9 @@ program ::= PROGRAM ID SEMI declares statements ENDPROGRAM SEMI;
 
 
 
-declares ::= declares declare
-			| declare;
+declares ::= declares declare  				{: System.out.println("Declares B1"); :}
+			| declare						{: System.out.println("Declares B2");:}
+			;
 
 declare ::= var_declaration
 			| function_decl; 

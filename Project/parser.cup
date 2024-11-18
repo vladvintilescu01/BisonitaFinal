@@ -39,15 +39,19 @@ terminal			STRING, INTEGER, REAL;
 terminal			IF, THEN, ELSE, ENDIF;
 terminal			WHILE, DO, ENDDO;
 terminal			FOR, TO, ENDFOR;
-terminal Integer    NUMBER;        // our scanner provides numbers as integers
-terminal String		ID;
-terminal String 	STRINGLITERAL;
+terminal  Integer	NUMBER_INT;
+terminal  Double	NUMBER_REAL;        
+terminal  String	ID;
+terminal  			STRINGLITERAL;
 /* Non terminals */
 non terminal program, declares, statements, statement, function_decl, function_declarations;
 non terminal declare, data_type, ident_list;
 non terminal assign_stmt, if_stmt, while_stmt, for_stmt, return_stmt, io_operation;
 non terminal expr_list, param_list, params, param_list_tail;
-non terminal Integer expr;
+non terminal expr;
+non terminal Integer int_expr;
+non terminal Double real_expr;
+non terminal String str_expr;
 non terminal var_declaration;
 non terminal param; 
 /* Precedences */
@@ -62,105 +66,118 @@ precedence right UMINUS;
 
 /* Program Structure */
 
+program ::= PROGRAM ID SEMI declares statements ENDPROGRAM SEMI		{: System.out.println("Program B1"); :}
+		;
 
-/*program ::= PROGRAM ID SEMI declares function_declarations statements ENDPROGRAM SEMI;
-
-
-function_declarations ::= function_declarations function_decl
-                         | function_decl
-                         | 
-                         ;
-                         
-
-
-*/
-program ::= PROGRAM ID SEMI declares statements ENDPROGRAM SEMI;
-
-
-
-declares ::= declares declare  				{: System.out.println("Declares B1"); :}
-			| declare						{: System.out.println("Declares B2");:}
+declares ::= declares declare  										{: System.out.println("Declares B1"); :}
+			| declare												{: System.out.println("Declares B2");:}
 			;
 
-declare ::= var_declaration
-			| function_decl; 
+declare ::= var_declaration											{: System.out.println("Declare B1"); :}
+			| function_decl 										{: System.out.println("Declare B2"); :}
+			;
+var_declaration ::= data_type ident_list SEMI						{: System.out.println("Var declaration B1"); :}
+				   ;
+function_decl ::= data_type FUNCTION ID LPAREN params RPAREN SEMI declares statements RETURN expr SEMI ENDFUNCTION SEMI 		{: System.out.println("Func declaration B1"); :}
+				;
 
-var_declaration ::= data_type ident_list SEMI;
-
-function_decl ::= data_type FUNCTION ID LPAREN params RPAREN SEMI declares statements RETURN expr SEMI ENDFUNCTION SEMI;
-
-ident_list ::= ident_list COMMA ID
-			   | ID
+ident_list ::= ident_list COMMA ID		{: System.out.println("Identification list B1"); :}
+			   | ID						{: System.out.println("Identification list B2"); :}
 			   ;	  
 			
-data_type ::= STRING 
-			| INTEGER
-			| REAL
+data_type ::= STRING 				{: System.out.println("Data type B1"); :}
+			| INTEGER				{: System.out.println("Data type B2"); :}
+			| REAL					{: System.out.println("Data type B3"); :}
 			;
 
-params ::= params COMMA param
-		  | param
+params ::= params COMMA param		{: System.out.println("Params B1"); :}
+		  | param					{: System.out.println("Params B2"); :}
 		  |
 		  ;
-param ::= data_type ID;
+param ::= data_type ID				{: System.out.println("Param B1"); :} 
+		  ;
                           
-
-
-statements ::= statements statement
-             | statement
+statements ::= statements statement		{: System.out.println("Statements B1"); :}
+             | statement				{: System.out.println("Statements B2"); :}
              ;
 
-statement ::= assign_stmt
-            | if_stmt
-            | while_stmt
-            | for_stmt            
-            | io_operation
+statement ::= assign_stmt				{: System.out.println("Statement B1"); :}
+            | if_stmt					{: System.out.println("Statement B2"); :}
+            | while_stmt				{: System.out.println("Statement B3"); :}
+            | for_stmt            		{: System.out.println("Statement B4"); :}
+            | io_operation				{: System.out.println("Statement B5"); :}
             ;
 			
-assign_stmt ::= ID ASSIGNMENT expr SEMI;
+assign_stmt ::= ID ASSIGNMENT expr SEMI										{: System.out.println("Assignment statement B1"); :} ;
                
-if_stmt ::= IF expr THEN statements ELSE statements ENDIF SEMI
-          | IF expr THEN statements ENDIF SEMI
+if_stmt ::= IF expr THEN statements ELSE statements ENDIF SEMI				{: System.out.println("If statement B1"); :}	
+          | IF expr THEN statements ENDIF SEMI								{: System.out.println("If statement B2"); :}
           ;
           
-while_stmt ::= WHILE expr DO statements ENDDO SEMI;
+while_stmt ::= WHILE expr DO statements ENDDO SEMI							{: System.out.println("While statement B1"); :} ;
 
-for_stmt ::= FOR ID ASSIGNMENT expr TO expr DO statements ENDFOR SEMI;
+for_stmt ::= FOR ID ASSIGNMENT expr TO expr DO statements ENDFOR SEMI		{: System.out.println("For statement B1"); :};
 
-return_stmt ::= RETURN expr SEMI;
+return_stmt ::= RETURN expr SEMI											{: System.out.println("Return statement B1"); :};
 
-io_operation ::= READ LPAREN ID RPAREN SEMI
-               | WRITE LPAREN STRINGLITERAL RPAREN SEMI
-               | MOVE LPAREN expr COMMA expr RPAREN SEMI
-               | DRAW LPAREN expr COMMA expr RPAREN SEMI
-               | SETCOLOR LPAREN expr RPAREN SEMI
-               | SETLINE LPAREN expr RPAREN SEMI
+io_operation ::= READ LPAREN ID RPAREN SEMI									{: System.out.println("IO operation B1"); :}
+               | WRITE LPAREN STRINGLITERAL RPAREN SEMI						{: System.out.println("IO operation B2"); :}
+               | MOVE LPAREN expr COMMA expr RPAREN SEMI					{: System.out.println("IO operation B3"); :}
+               | DRAW LPAREN expr COMMA expr RPAREN SEMI					{: System.out.println("IO operation B4"); :}
+               | SETCOLOR LPAREN expr RPAREN SEMI							{: System.out.println("IO operation B5"); :}
+               | SETLINE LPAREN expr RPAREN SEMI							{: System.out.println("IO operation B6"); :}
                | CLEAR SEMI
                ;
                
-expr_list ::= expr_list expr:e SEMI         {: System.out.println(e); :}
-            | expr:e SEMI                   {: System.out.println(e); :}
-            ;
-            
-expr ::= expr:e1 PLUS expr:e2            {:        :}
-       | expr:e1 MINUS expr:e2           {:        :}
-       | expr:e1 TIMES expr:e2           {:        :}
-       | expr:e1 DIVIDE expr:e2          {:        :}
-       | expr:e1 POW expr:e2             {:  :} // Assuming e1 and e2 are cast to doubles as needed
-       | expr:e1 MOD expr:e2             {:       :} // Only for integers
-       | expr:e1 AND expr:e2             {:  :} // Logical AND
-       | expr:e1 OR expr:e2              {:  :} // Logical OR
-       | NOT expr:e                      {:  :} // Logical NOT
-       | expr:e1 EQUAL expr:e2           {:  :} // Relational operators
-       | expr:e1 NOTEQUAL expr:e2        {:  :}
-       | expr:e1 LESSER expr:e2          {:  :}
-       | expr:e1 GREATER expr:e2         {: :}
-       | expr:e1 LESSERE expr:e2         {:  :}
-       | expr:e1 GREATERE expr:e2        {:  :}
-       | MINUS expr:e                    {:           :} %prec UMINUS
-       | LPAREN expr:e RPAREN            {:              :}
-       | NUMBER:n                        {:              :}
-       | ID                              {: System.out.println("Assigned "); :}
+expr ::= int_expr			{: System.out.println("Expr B1"); :}
+       | real_expr			{: System.out.println("Expr B2"); :}
+       | str_expr			{: System.out.println("Expr B3"); :}
        ;
 
+/* Integer Expressions */
+int_expr ::= int_expr:e1 PLUS int_expr:e2        {: System.out.println("Expr int B1"); :}						
+           | int_expr:e1 MINUS int_expr:e2       {: System.out.println("Expr int B2"); :}
+           | int_expr:e1 TIMES int_expr:e2       {: System.out.println("Expr int B3"); :}
+           | int_expr:e1 DIVIDE int_expr:e2      {: System.out.println("Expr int B4"); :}
+           | int_expr:e1 MOD int_expr:e2         {: System.out.println("Expr int B5"); :}
+           | int_expr:e1 POW int_expr:e2         {: System.out.println("Expr int B6"); :}
+           | int_expr:e1 AND int_expr:e2         {: System.out.println("Expr int B7"); :}
+	       | int_expr:e1 OR int_expr:e2          {: System.out.println("Expr int B8"); :} 
+	       | NOT int_expr:e                      {: System.out.println("Expr int B9"); :} 
+	       | int_expr:e1 EQUAL int_expr:e2       {: System.out.println("Expr int B10"); :} 
+	       | int_expr:e1 NOTEQUAL int_expr:e2    {: System.out.println("Expr int B11"); :}
+	       | int_expr:e1 LESSER int_expr:e2      {: System.out.println("Expr int B12"); :}
+	       | int_expr:e1 GREATER int_expr:e2     {: System.out.println("Expr int B13"); :}
+	       | int_expr:e1 LESSERE int_expr:e2     {: System.out.println("Expr int B14"); :}
+	       | int_expr:e1 GREATERE int_expr:e2    {: System.out.println("Expr int B15"); :}
+           | MINUS int_expr:e                    {: System.out.println("Expr int B16"); :} %prec UMINUS
+           | LPAREN int_expr:e RPAREN            {: System.out.println("Expr int B17"); :}
+           | NUMBER_INT:n                        {: System.out.println("Expr int B18"); :}
+           | ID                                  {: System.out.println("Expr int B19"); :}
+           ;
+
+/* Real Expressions */
+real_expr ::= real_expr:e1 PLUS real_expr:e2     {: System.out.println("Expr real B1"); :}
+            | real_expr:e1 MINUS real_expr:e2    {: System.out.println("Expr real B2"); :}
+            | real_expr:e1 TIMES real_expr:e2    {: System.out.println("Expr real B3"); :}
+            | real_expr:e1 DIVIDE real_expr:e2   {: System.out.println("Expr real B4"); :}
+            | real_expr:e1 POW real_expr:e2      {: System.out.println("Expr real B5"); :}
+	        | real_expr:e1 EQUAL real_expr:e2    {: System.out.println("Expr real B6"); :} 
+	        | real_expr:e1 NOTEQUAL real_expr:e2 {: System.out.println("Expr real B7"); :}
+	        | real_expr:e1 LESSER real_expr:e2   {: System.out.println("Expr real B8"); :}
+	        | real_expr:e1 GREATER real_expr:e2  {: System.out.println("Expr real B9"); :}
+	        | real_expr:e1 LESSERE real_expr:e2  {: System.out.println("Expr real B10"); :}
+	        | real_expr:e1 GREATERE real_expr:e2 {: System.out.println("Expr real B11"); :}     
+            | MINUS real_expr:e                  {: System.out.println("Expr real B12"); :} %prec UMINUS
+            | LPAREN real_expr:e RPAREN          {: System.out.println("Expr real B13"); :}
+            | NUMBER_REAL:n                      {: System.out.println("Expr real B14"); :} 
+            | ID                                 {: System.out.println("Expr real B15"); :}
+            ;
+
+/* String Expressions */
+str_expr ::= str_expr:e1 EQUAL str_expr:e2      {: System.out.println("Expr string B1"); :} 
+		   | str_expr:e1 NOTEQUAL str_expr:e2   {: System.out.println("Expr string B2"); :}
+           | STRINGLITERAL:s                    {: System.out.println("Expr string B3"); :}
+           | ID                                 {: System.out.println("Expr string B4"); :}
+           ;
      

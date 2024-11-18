@@ -36,13 +36,12 @@ public interface sym {
   public static final int LESSER = 17;
   public static final int PLUS = 3;
   public static final int IF = 39;
-  public static final int ID = 50;
+  public static final int ID = 51;
   public static final int EOF = 0;
   public static final int RETURN = 25;
   public static final int EQUAL = 12;
   public static final int error = 1;
   public static final int PROGRAM = 21;
-  public static final int NUMBER = 49;
   public static final int GREATERE = 20;
   public static final int MOD = 9;
   public static final int REAL = 38;
@@ -57,9 +56,11 @@ public interface sym {
   public static final int WHILE = 43;
   public static final int CLEAR = 35;
   public static final int THEN = 40;
+  public static final int NUMBER_REAL = 50;
   public static final int STRING = 36;
-  public static final int STRINGLITERAL = 51;
+  public static final int STRINGLITERAL = 52;
   public static final int DO = 44;
+  public static final int NUMBER_INT = 49;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
@@ -110,7 +111,8 @@ public interface sym {
   "FOR",
   "TO",
   "ENDFOR",
-  "NUMBER",
+  "NUMBER_INT",
+  "NUMBER_REAL",
   "ID",
   "STRINGLITERAL"
   };

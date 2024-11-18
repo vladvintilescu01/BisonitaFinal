@@ -56,7 +56,8 @@ import java.io.InputStreamReader;
 
 Newline    = \r | \n | \r\n
 Whitespace = [ \t\f] | {Newline}
-Number     = [0-9]+
+Number_int     = [0-9]+
+Number_real = [0-9]+\.[0-9]+
 
 /* comments */
 Comment = {TraditionalComment} | {EndOfLineComment}
@@ -128,7 +129,8 @@ StringLiteral = \".*\"
   "set color"		{ return symbolFactory.newSymbol("SETCOLOR", SETCOLOR); }
   "set line"		{ return symbolFactory.newSymbol("SETLINE", SETLINE); }  
   {ident}			{ return symbolFactory.newSymbol("ID", ID, yytext()); }
-  {Number}          { return symbolFactory.newSymbol("NUMBER", NUMBER, Integer.parseInt(yytext())); }
+  {Number_int}      { return symbolFactory.newSymbol("NUMBER_INT", NUMBER_INT, Integer.parseInt(yytext())); }
+  {Number_real}		{ return symbolFactory.newSymbol("NUMBER_REAL", NUMBER_REAL, Double.parseDouble(yytext())); }
   {StringLiteral}   { return symbolFactory.newSymbol("STRINGLITERAL", STRINGLITERAL, yytext()); }
 }
 

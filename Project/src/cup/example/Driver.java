@@ -1,19 +1,21 @@
 package cup.example;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-
-import java_cup.runtime.*;
+import classes.TreeNode;
+import classes.TreeNodePrinter;
 
 class Driver {
 
     public static void main(String[] args) throws Exception {
-        Parser parser = new Parser();
-        parser.parse();
+         Parser parser = new Parser();
+         parser.parse();
+         TreeNode root = parser.getParseTree();
+         TreeNodePrinter treePrinter = new TreeNodePrinter(root);
+         treePrinter.print();
+        
+         //parser.debug_parse();
         /*
         ComplexSymbolFactory f = new ComplexSymbolFactory();
-
+          
           File file = new File("input.txt");
           FileInputStream fis = null;
           try {
@@ -25,8 +27,7 @@ class Driver {
           Symbol currentSymbol ;
           while ((currentSymbol = lexer.next_token()).sym != sym.EOF) {
               System.out.println("currentSymbol == " + currentSymbol);
-          }
-         */ 
+          }*/
     }
-
+    
 }

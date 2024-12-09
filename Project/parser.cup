@@ -5,6 +5,7 @@
 
 package cup.example;
 
+import classes.TreeNode;
 import java_cup.runtime.*;
 import cup.example.Lexer;
 import java.io.IOException;
@@ -13,6 +14,10 @@ import java.io.FileInputStream;
 
 parser code {:
   protected Lexer lexer;
+  protected TreeNode parseTreeRoot = null;
+  public TreeNode getParseTree(){
+		return parseTreeRoot;
+	}
 :}
 
 /* define how to connect to the scanner! */
@@ -42,18 +47,18 @@ terminal			FOR, TO, ENDFOR;
 terminal  Integer	NUMBER_INT;
 terminal  Double	NUMBER_REAL;        
 terminal  String	ID;
-terminal  			STRINGLITERAL;
+terminal  String	STRINGLITERAL;
 /* Non terminals */
-non terminal program, declares, statements, statement, function_decl, function_declarations;
-non terminal declare, data_type, ident_list;
-non terminal assign_stmt, if_stmt, while_stmt, for_stmt, return_stmt, io_operation;
-non terminal expr_list, param_list, params, param_list_tail;
-non terminal expr;
-non terminal Integer int_expr;
-non terminal Double real_expr;
-non terminal String str_expr;
-non terminal var_declaration;
-non terminal param; 
+non terminal TreeNode program, declares, statements, statement, function_decl, function_declarations;
+non terminal TreeNode declare, data_type, ident_list;
+non terminal TreeNode assign_stmt, if_stmt, while_stmt, for_stmt, return_stmt, io_operation;
+non terminal TreeNode expr_list, param_list, params, param_list_tail, ret;
+non terminal TreeNode expr;
+non terminal TreeNode int_expr;
+non terminal TreeNode real_expr;
+non terminal TreeNode str_expr;
+non terminal TreeNode var_declaration;
+non terminal TreeNode param; 
 /* Precedences */
 precedence left OR;
 precedence left AND;
@@ -66,118 +71,365 @@ precedence right UMINUS;
 
 /* Program Structure */
 
-program ::= PROGRAM ID SEMI declares statements ENDPROGRAM SEMI		{: System.out.println("Program B1"); :}
+program ::= PROGRAM ID:i SEMI declares:d statements:s ENDPROGRAM SEMI	{: parseTreeRoot = new TreeNode("program: " + i);
+																		   parseTreeRoot.addChild(d);
+																	       parseTreeRoot.addChild(s);
+																	       RESULT = parseTreeRoot;						
+																    	:}			
 		;
 
-declares ::= declares declare  										{: System.out.println("Declares B1"); :}
-			| declare												{: System.out.println("Declares B2");:}
+declares ::= declares:ds declare:d  								{:  ds.addChild(d);
+																		RESULT = ds; 
+																	:}
+			| declare:d												{:  TreeNode result = new TreeNode("declarations_list");
+																		result.addChild(d);
+																		RESULT = result;
+																	:}
 			;
 
-declare ::= var_declaration											{: System.out.println("Declare B1"); :}
-			| function_decl 										{: System.out.println("Declare B2"); :}
+declare ::= var_declaration: vd										{:  TreeNode result = new TreeNode("declaration");
+																		result.addChild(vd);
+																		RESULT = result;
+																	:}
+			| function_decl: fd 									{:  TreeNode result = new TreeNode("declaration");
+																		result.addChild(fd);
+																		RESULT = result;
+																	:}
 			;
-var_declaration ::= data_type ident_list SEMI						{: System.out.println("Var declaration B1"); :}
+var_declaration ::= data_type:dt ident_list:il SEMI					{:  TreeNode result = new TreeNode("variable_declaration");
+																		result.addChild(dt);
+																		result.addChild(il);
+																		RESULT = result;
+																	:}
 				   ;
-function_decl ::= data_type FUNCTION ID LPAREN params RPAREN SEMI declares statements RETURN expr SEMI ENDFUNCTION SEMI 		{: System.out.println("Func declaration B1"); :}
+function_decl ::= data_type:dt FUNCTION ID:i LPAREN params:p RPAREN SEMI declares:d statements:s ret:r ENDFUNCTION SEMI 	{:  TreeNode result = new TreeNode("function_declaration: " + i);
+																																			result.addChild(dt);
+																																			result.addChild(p);
+																																			result.addChild(d);
+																																			result.addChild(s);
+																																			result.addChild(r);
+																																			RESULT = result;
+																																		:}
 				;
 
-ident_list ::= ident_list COMMA ID		{: System.out.println("Identification list B1"); :}
-			   | ID						{: System.out.println("Identification list B2"); :}
+ident_list ::= ident_list:il COMMA ID:i		{:  il.addChild(new TreeNode(i));
+												RESULT = il; 
+											:}
+			   | ID:i						{:  TreeNode result = new TreeNode("identifiers");
+												result.addChild(new TreeNode(i));
+				        						RESULT = result;
+											:}
 			   ;	  
 			
-data_type ::= STRING 				{: System.out.println("Data type B1"); :}
-			| INTEGER				{: System.out.println("Data type B2"); :}
-			| REAL					{: System.out.println("Data type B3"); :}
+data_type ::= STRING 				{:  TreeNode result = new TreeNode("string");
+				        			    RESULT = result;
+									:}
+			| INTEGER				{:  TreeNode result = new TreeNode("integer");
+				        			    RESULT = result;
+									:}
+			| REAL				{:  TreeNode result = new TreeNode("real");
+				        			    RESULT = result;
+									:}
 			;
 
-params ::= params COMMA param		{: System.out.println("Params B1"); :}
-		  | param					{: System.out.println("Params B2"); :}
-		  |
+params ::= params:ps COMMA param:p	{:  ps.addChild(p);
+								        RESULT = ps; 
+									:}
+		  | param:p					{: TreeNode result = new TreeNode("params");
+									   result.addChild(p);
+									   RESULT = result;
+								    :}
+		  |							{:
+									:}
 		  ;
-param ::= data_type ID				{: System.out.println("Param B1"); :} 
+		  
+param ::= data_type:dt ID:i			{: TreeNode result = new TreeNode("param: " + i);
+									   result.addChild(dt);
+									   RESULT = result;
+								    :}
 		  ;
                           
-statements ::= statements statement		{: System.out.println("Statements B1"); :}
-             | statement				{: System.out.println("Statements B2"); :}
+statements ::= statements:ss statement:s	{:  ss.addChild(s);
+												RESULT = ss; 
+											:}
+             | statement:s					{:  TreeNode result = new TreeNode("statements_list");
+												result.addChild(s);
+												RESULT = result;
+											:}
              ;
 
-statement ::= assign_stmt				{: System.out.println("Statement B1"); :}
-            | if_stmt					{: System.out.println("Statement B2"); :}
-            | while_stmt				{: System.out.println("Statement B3"); :}
-            | for_stmt            		{: System.out.println("Statement B4"); :}
-            | io_operation				{: System.out.println("Statement B5"); :}
+statement ::= assign_stmt:as				{:  TreeNode result = new TreeNode("statement");
+												result.addChild(as);
+												RESULT = result;
+											:}
+            | if_stmt:is					{:  TreeNode result = new TreeNode("statement");
+												result.addChild(is);
+												RESULT = result;
+											:}
+            | while_stmt:ws				    {:  TreeNode result = new TreeNode("statement");
+												result.addChild(ws);
+												RESULT = result;
+											:}
+            | for_stmt:fs           		    {:  TreeNode result = new TreeNode("statement");
+												result.addChild(fs);
+												RESULT = result;
+											:}
+            | io_operation:io			    {:  TreeNode result = new TreeNode("statement");
+												result.addChild(io);
+												RESULT = result;
+											:}
             ;
 			
-assign_stmt ::= ID ASSIGNMENT expr SEMI										{: System.out.println("Assignment statement B1"); :} ;
-               
-if_stmt ::= IF expr THEN statements ELSE statements ENDIF SEMI				{: System.out.println("If statement B1"); :}	
-          | IF expr THEN statements ENDIF SEMI								{: System.out.println("If statement B2"); :}
+assign_stmt ::= ID:i ASSIGNMENT expr:e SEMI									{:  TreeNode result = new TreeNode("assigned: " + i);
+									   											result.addChild(e);
+									   											RESULT = result;
+																		    :}
+              ;
+if_stmt ::= IF expr:e THEN statements:ss1 ELSE statements:ss2 ENDIF SEMI	{:  TreeNode result = new TreeNode("if_statement");
+																				result.addChild(e);
+																				result.addChild(ss1);
+																				result.addChild(ss2);
+																				RESULT = result;
+																			:}	
+          | IF expr:e THEN statements:ss ENDIF SEMI							{:  TreeNode result = new TreeNode("if_statement");
+																				result.addChild(e);
+																				result.addChild(ss);
+																				RESULT = result;
+																			:}	
           ;
           
-while_stmt ::= WHILE expr DO statements ENDDO SEMI							{: System.out.println("While statement B1"); :} ;
+while_stmt ::= WHILE expr:e DO statements:ss ENDDO SEMI						{:  TreeNode result = new TreeNode("while_statement");
+																				result.addChild(e);
+																				result.addChild(ss);
+																				RESULT = result;
+																			:} 
+			;
 
-for_stmt ::= FOR ID ASSIGNMENT expr TO expr DO statements ENDFOR SEMI		{: System.out.println("For statement B1"); :};
+for_stmt ::= FOR ID:i ASSIGNMENT expr:e1 TO expr:e2 DO statements:ss ENDFOR SEMI	{:  TreeNode result = new TreeNode("for_statement: " + i);
+																						result.addChild(e1);
+																						result.addChild(e2);
+																						result.addChild(ss);
+																						RESULT = result;
+																					:}
+			;
 
-return_stmt ::= RETURN expr SEMI											{: System.out.println("Return statement B1"); :};
-
-io_operation ::= READ LPAREN ID RPAREN SEMI									{: System.out.println("IO operation B1"); :}
-               | WRITE LPAREN STRINGLITERAL RPAREN SEMI						{: System.out.println("IO operation B2"); :}
-               | MOVE LPAREN expr COMMA expr RPAREN SEMI					{: System.out.println("IO operation B3"); :}
-               | DRAW LPAREN expr COMMA expr RPAREN SEMI					{: System.out.println("IO operation B4"); :}
-               | SETCOLOR LPAREN expr RPAREN SEMI							{: System.out.println("IO operation B5"); :}
-               | SETLINE LPAREN expr RPAREN SEMI							{: System.out.println("IO operation B6"); :}
-               | CLEAR SEMI
+ret ::= RETURN expr:e SEMI					        						{:  TreeNode result = new TreeNode("return");
+																				result.addChild(e);
+																				RESULT = result;
+																			:} 
+			 ;
+io_operation ::= READ LPAREN ID:i RPAREN SEMI								{:  TreeNode result = new TreeNode("io_read_operation: " + i);
+																				RESULT = result;
+																			:} 
+               | WRITE LPAREN STRINGLITERAL:s RPAREN SEMI					{:  TreeNode result = new TreeNode("io_write_operation: " + s);
+																				RESULT = result;
+																			:} 
+               | MOVE LPAREN expr:e1 COMMA expr:e2 RPAREN SEMI				{:  TreeNode result = new TreeNode("io_move_operation");
+																				result.addChild(e1);
+																				result.addChild(e2);																				
+																				RESULT = result;
+																			:} 
+               | DRAW LPAREN expr:e1 COMMA expr:e2 RPAREN SEMI				{:  TreeNode result = new TreeNode("io_draw_operation");
+																				result.addChild(e1);
+																				result.addChild(e2);																				
+																				RESULT = result;
+																			:} 
+               | SETCOLOR LPAREN expr:e RPAREN SEMI							{:  TreeNode result = new TreeNode("io_setcolor_operation");
+																				result.addChild(e);																				
+																				RESULT = result;
+																			:} 
+               | SETLINE LPAREN expr:e RPAREN SEMI							{:  TreeNode result = new TreeNode("io_setline_operation");
+																				result.addChild(e);																				
+																				RESULT = result;
+																			:} 
+               | CLEAR SEMI													{:  TreeNode result = new TreeNode("io_clear_operation");																			
+																				RESULT = result;
+																			:} 
                ;
                
-expr ::= int_expr			{: System.out.println("Expr B1"); :}
-       | real_expr			{: System.out.println("Expr B2"); :}
-       | str_expr			{: System.out.println("Expr B3"); :}
+expr ::= int_expr:ie		{:  TreeNode result = new TreeNode("expression");
+								result.addChild(ie);																				
+								RESULT = result;
+							:}
+									
+       | real_expr:re		{:  TreeNode result = new TreeNode("expression");
+								result.addChild(re);																				
+								RESULT = result;
+							:}
+							
+       | str_expr:se		{:  TreeNode result = new TreeNode("expression");
+								result.addChild(se);																				
+								RESULT = result;
+							:}
        ;
 
 /* Integer Expressions */
-int_expr ::= int_expr:e1 PLUS int_expr:e2        {: System.out.println("Expr int B1"); :}						
-           | int_expr:e1 MINUS int_expr:e2       {: System.out.println("Expr int B2"); :}
-           | int_expr:e1 TIMES int_expr:e2       {: System.out.println("Expr int B3"); :}
-           | int_expr:e1 DIVIDE int_expr:e2      {: System.out.println("Expr int B4"); :}
-           | int_expr:e1 MOD int_expr:e2         {: System.out.println("Expr int B5"); :}
-           | int_expr:e1 POW int_expr:e2         {: System.out.println("Expr int B6"); :}
-           | int_expr:e1 AND int_expr:e2         {: System.out.println("Expr int B7"); :}
-	       | int_expr:e1 OR int_expr:e2          {: System.out.println("Expr int B8"); :} 
-	       | NOT int_expr:e                      {: System.out.println("Expr int B9"); :} 
-	       | int_expr:e1 EQUAL int_expr:e2       {: System.out.println("Expr int B10"); :} 
-	       | int_expr:e1 NOTEQUAL int_expr:e2    {: System.out.println("Expr int B11"); :}
-	       | int_expr:e1 LESSER int_expr:e2      {: System.out.println("Expr int B12"); :}
-	       | int_expr:e1 GREATER int_expr:e2     {: System.out.println("Expr int B13"); :}
-	       | int_expr:e1 LESSERE int_expr:e2     {: System.out.println("Expr int B14"); :}
-	       | int_expr:e1 GREATERE int_expr:e2    {: System.out.println("Expr int B15"); :}
-           | MINUS int_expr:e                    {: System.out.println("Expr int B16"); :} %prec UMINUS
-           | LPAREN int_expr:e RPAREN            {: System.out.println("Expr int B17"); :}
-           | NUMBER_INT:n                        {: System.out.println("Expr int B18"); :}
-           | ID                                  {: System.out.println("Expr int B19"); :}
+int_expr ::= int_expr:e1 PLUS int_expr:e2       {:  TreeNode result = new TreeNode("int_plus_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :} 					
+           | int_expr:e1 MINUS int_expr:e2       {:  TreeNode result = new TreeNode("int_minus_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+           | int_expr:e1 TIMES int_expr:e2       {:  TreeNode result = new TreeNode("int_times_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+           | int_expr:e1 DIVIDE int_expr:e2      {:  TreeNode result = new TreeNode("int_divide_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+           | int_expr:e1 MOD int_expr:e2         {:  TreeNode result = new TreeNode("int_mod_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+           | int_expr:e1 POW int_expr:e2         {:  TreeNode result = new TreeNode("int_pow_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+           | int_expr:e1 AND int_expr:e2         {:  TreeNode result = new TreeNode("int_and_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+	       | int_expr:e1 OR int_expr:e2          {:  TreeNode result = new TreeNode("int_or_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+	       | NOT int_expr:e                      {:  TreeNode result = new TreeNode("int_not_operation");
+													 result.addChild(e);																				
+													 RESULT = result;
+												 :}
+	       | int_expr:e1 EQUAL int_expr:e2       {:  TreeNode result = new TreeNode("int_equal_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+	       | int_expr:e1 NOTEQUAL int_expr:e2    {:  TreeNode result = new TreeNode("int_notequal_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+	       | int_expr:e1 LESSER int_expr:e2      {:  TreeNode result = new TreeNode("int_lesser_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+	       | int_expr:e1 GREATER int_expr:e2     {:  TreeNode result = new TreeNode("int_greater_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+	       | int_expr:e1 LESSERE int_expr:e2     {:  TreeNode result = new TreeNode("int_lessere_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+	       | int_expr:e1 GREATERE int_expr:e2    {:  TreeNode result = new TreeNode("int_greatere_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+           | MINUS int_expr:e                    {:  TreeNode result = new TreeNode("int_minus_in_front_operation");
+													 result.addChild(e);																			
+													 RESULT = result;
+												 :} %prec UMINUS
+           | LPAREN int_expr:e RPAREN            {:  TreeNode result = new TreeNode("int_operation_between_parenthesis");
+													 result.addChild(e);																			
+													 RESULT = result;
+												 :}
+           | NUMBER_INT:n                        {: RESULT = new TreeNode("" + n); :}
+           | ID:i                                {: RESULT = new TreeNode(i); :}
            ;
 
 /* Real Expressions */
-real_expr ::= real_expr:e1 PLUS real_expr:e2     {: System.out.println("Expr real B1"); :}
-            | real_expr:e1 MINUS real_expr:e2    {: System.out.println("Expr real B2"); :}
-            | real_expr:e1 TIMES real_expr:e2    {: System.out.println("Expr real B3"); :}
-            | real_expr:e1 DIVIDE real_expr:e2   {: System.out.println("Expr real B4"); :}
-            | real_expr:e1 POW real_expr:e2      {: System.out.println("Expr real B5"); :}
-	        | real_expr:e1 EQUAL real_expr:e2    {: System.out.println("Expr real B6"); :} 
-	        | real_expr:e1 NOTEQUAL real_expr:e2 {: System.out.println("Expr real B7"); :}
-	        | real_expr:e1 LESSER real_expr:e2   {: System.out.println("Expr real B8"); :}
-	        | real_expr:e1 GREATER real_expr:e2  {: System.out.println("Expr real B9"); :}
-	        | real_expr:e1 LESSERE real_expr:e2  {: System.out.println("Expr real B10"); :}
-	        | real_expr:e1 GREATERE real_expr:e2 {: System.out.println("Expr real B11"); :}     
-            | MINUS real_expr:e                  {: System.out.println("Expr real B12"); :} %prec UMINUS
-            | LPAREN real_expr:e RPAREN          {: System.out.println("Expr real B13"); :}
-            | NUMBER_REAL:n                      {: System.out.println("Expr real B14"); :} 
-            | ID                                 {: System.out.println("Expr real B15"); :}
+real_expr ::= real_expr:e1 PLUS real_expr:e2     {:  TreeNode result = new TreeNode("real_plus_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+            | real_expr:e1 MINUS real_expr:e2    {:  TreeNode result = new TreeNode("real_minus_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+            | real_expr:e1 TIMES real_expr:e2    {:  TreeNode result = new TreeNode("real_times_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+            | real_expr:e1 DIVIDE real_expr:e2   {:  TreeNode result = new TreeNode("real_devide_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+            | real_expr:e1 POW real_expr:e2      {:  TreeNode result = new TreeNode("real_pow_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+	        | real_expr:e1 EQUAL real_expr:e2    {:  TreeNode result = new TreeNode("real_equal_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :} 
+	        | real_expr:e1 NOTEQUAL real_expr:e2 {:  TreeNode result = new TreeNode("real_notequal_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+	        | real_expr:e1 LESSER real_expr:e2   {:  TreeNode result = new TreeNode("real_lesser_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+	        | real_expr:e1 GREATER real_expr:e2  {:  TreeNode result = new TreeNode("real_greater_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+	        | real_expr:e1 LESSERE real_expr:e2  {:  TreeNode result = new TreeNode("real_lessere_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}
+	        | real_expr:e1 GREATERE real_expr:e2 {:  TreeNode result = new TreeNode("real_greatere_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :}     
+            | MINUS real_expr:e                  {:  TreeNode result = new TreeNode("real_minus_operation");
+													 result.addChild(e);																			
+													 RESULT = result;
+												 :} %prec UMINUS
+            | LPAREN real_expr:e RPAREN          {:  TreeNode result = new TreeNode("real_operation_between_parenthesis");
+													 result.addChild(e);																			
+													 RESULT = result;
+												 :}
+            | NUMBER_REAL:n                      {: RESULT = new TreeNode("" + n); :}
+            | ID:i                               {: RESULT = new TreeNode(i); :}
             ;
 
 /* String Expressions */
-str_expr ::= str_expr:e1 EQUAL str_expr:e2      {: System.out.println("Expr string B1"); :} 
-		   | str_expr:e1 NOTEQUAL str_expr:e2   {: System.out.println("Expr string B2"); :}
-           | STRINGLITERAL:s                    {: System.out.println("Expr string B3"); :}
-           | ID                                 {: System.out.println("Expr string B4"); :}
+str_expr ::= str_expr:e1 EQUAL str_expr:e2      {:   TreeNode result = new TreeNode("str_equal_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :} 
+		   | str_expr:e1 NOTEQUAL str_expr:e2   {:   TreeNode result = new TreeNode("str_notequal_operation");
+													 result.addChild(e1);
+												   	 result.addChild(e2);																				
+													 RESULT = result;
+												 :} 
+           | STRINGLITERAL:s                    {: RESULT = new TreeNode(s); :}
+           | ID:i                                 {: RESULT = new TreeNode(i); :}
            ;
      

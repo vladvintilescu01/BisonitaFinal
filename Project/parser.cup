@@ -1,6 +1,9 @@
 /*
    Simple +/-/* expression language; 
    parser evaluates constant expressions on the fly
+
+
+	Vintilescu Vlad-Florian
 */
 
 package cup.example;
@@ -102,7 +105,7 @@ var_declaration ::= data_type:dt ident_list:il SEMI					{:  TreeNode result = ne
 																		RESULT = result;
 																	:}
 				   ;
-function_decl ::= data_type:dt FUNCTION ID:i LPAREN params:p RPAREN SEMI declares:d statements:s ret:r ENDFUNCTION SEMI 	{:  TreeNode result = new TreeNode("function_declaration: " + i);
+function_decl ::= data_type:dt FUNCTION ID:i LPAREN params:p RPAREN SEMI declares:d statements:s ret:r ENDFUNCTION SEMI         	 {:     TreeNode result = new TreeNode("function_declaration:" + i);
 																																			result.addChild(dt);
 																																			result.addChild(p);
 																																			result.addChild(d);
@@ -127,7 +130,7 @@ data_type ::= STRING 				{:  TreeNode result = new TreeNode("string");
 			| INTEGER				{:  TreeNode result = new TreeNode("integer");
 				        			    RESULT = result;
 									:}
-			| REAL				{:  TreeNode result = new TreeNode("real");
+			| REAL				   {:  TreeNode result = new TreeNode("real");
 				        			    RESULT = result;
 									:}
 			;
@@ -143,7 +146,7 @@ params ::= params:ps COMMA param:p	{:  ps.addChild(p);
 									:}
 		  ;
 		  
-param ::= data_type:dt ID:i			{: TreeNode result = new TreeNode("param: " + i);
+param ::= data_type:dt ID:i			{: TreeNode result = new TreeNode(i);
 									   result.addChild(dt);
 									   RESULT = result;
 								    :}

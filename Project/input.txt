@@ -7,6 +7,12 @@ integer function Add(integer x, integer y);
   return result;
 endfunction;
 
+integer function divide(integer w, integer z);
+  integer result2;
+  result := w + z;
+  return result2;
+endfunction;
+
 a := 3 + 2;
 if (a = b) and (a > 0) then
   c := 5;

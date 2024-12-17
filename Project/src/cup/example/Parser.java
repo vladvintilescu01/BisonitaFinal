@@ -708,7 +708,7 @@ class CUP$Parser$actions {
 		Location rxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).xright;
 		TreeNode r = (TreeNode)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
 		//@@CUPDBG9
-  TreeNode result = new TreeNode("function_declaration: " + i);
+     TreeNode result = new TreeNode("function_declaration:" + i);
 																																			result.addChild(dt);
 																																			result.addChild(p);
 																																			result.addChild(d);
@@ -846,7 +846,7 @@ class CUP$Parser$actions {
 		Location ixright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$Parser$stack.peek()).xright;
 		String i = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		//@@CUPDBG18
- TreeNode result = new TreeNode("param: " + i);
+ TreeNode result = new TreeNode(i);
 									   result.addChild(dt);
 									   RESULT = result;
 								    

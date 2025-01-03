@@ -50,10 +50,12 @@ public class SymbolsTable {
 		
 		if (node.getNodeInfo().startsWith("function_declaration:")) {
 	    	String afterColon = node.getNodeInfo().substring("function_declaration:".length());
+	    	
 	    	if (table.containsKey(afterColon)) {
-		        System.err.println("Error: Function '" + afterColon + "' is d multiple times in the same scope.");
+		        System.err.println("Error: Function '" + afterColon + "' is multiple times in the same scope.");
 		        System.exit(1);
 		    }
+	    	
 	    	var currentChildren = node.getChildren();
 		    SymbolDetails details = new SymbolDetails();
 			details.contextName = currentContext;
@@ -67,14 +69,21 @@ public class SymbolsTable {
 				var paramsNames = paramsNode.getChildren();
 				
 				for(int i = 0; i < paramsNames.length; i++)
-				{
-					SymbolDetails details1 = new SymbolDetails();
-					details1.contextName = afterColon;
-					details1.symbolName = "parameter " + paramsNames[i].getNodeInfo() + " from function " + afterColon;
-					details1.dataType = currentChildren[0].getNodeInfo();
-					details1.symbolScope = IdentifierScope.Local;
-					details1.symbolType = SymbolType.Variable;
-					table.put(details1.symbolName, details1);	
+				{					    
+					String symbolName = paramsNames[i].getNodeInfo();
+					
+					if (table.containsKey("parameter " + symbolName + " from function " + afterColon)) {
+						System.err.println("Error: Parameter '" + symbolName + "' is declared multiple times in the same scope, in function: " + afterColon);
+						System.exit(1);
+					} else {
+						SymbolDetails details1 = new SymbolDetails();
+						details1.contextName = afterColon;
+						details1.symbolName = "parameter " + paramsNames[i].getNodeInfo() + " from function " + afterColon;
+						details1.dataType = currentChildren[0].getNodeInfo();
+						details1.symbolScope = IdentifierScope.Local;
+						details1.symbolType = SymbolType.Variable;
+						table.put(details1.symbolName, details1);	
+					}
 				}
 			}
 		   	context = afterColon;

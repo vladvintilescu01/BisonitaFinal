@@ -26,22 +26,35 @@ public class SymbolsTable {
 				var identifiersNode = currentChildren[1];
 				var variableNames = identifiersNode.getChildren();
 				
-				for(int i = 0; i < variableNames.length; i++)
-				{
-					SymbolDetails details = new SymbolDetails();
-					details.contextName = currentContext;
-					details.symbolName = variableNames[i].getNodeInfo();
-					details.dataType = currentChildren[0].getNodeInfo();
-					details.symbolScope = scope;
-					details.symbolType = SymbolType.Variable;
-					table.put(details.symbolName, details);	
+				for (int i = 0; i < variableNames.length; i++) {
+				    String symbolName = variableNames[i].getNodeInfo();
+
+				    if (table.containsKey(symbolName)) {
+				        System.err.println("Error: Variable '" + symbolName + "' is declared multiple times in the same scope.");
+				        System.exit(1);
+				    } else {
+				        SymbolDetails details = new SymbolDetails();
+				        details.contextName = currentContext;
+				        details.symbolName = symbolName;
+				        details.dataType = currentChildren[0].getNodeInfo();
+				        details.symbolScope = scope;
+				        details.symbolType = SymbolType.Variable;
+				        table.put(details.symbolName, details);
+				    }
 				}
-			}			
+
+
+			}
+			
 		}
 		
 		if (node.getNodeInfo().startsWith("function_declaration:")) {
 	    	String afterColon = node.getNodeInfo().substring("function_declaration:".length());
-			var currentChildren = node.getChildren();
+	    	if (table.containsKey(afterColon)) {
+		        System.err.println("Error: Function '" + afterColon + "' is d multiple times in the same scope.");
+		        System.exit(1);
+		    }
+	    	var currentChildren = node.getChildren();
 		    SymbolDetails details = new SymbolDetails();
 			details.contextName = currentContext;
 			details.symbolName = afterColon;

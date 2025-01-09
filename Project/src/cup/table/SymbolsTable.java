@@ -52,7 +52,7 @@ public class SymbolsTable {
 	    	String afterColon = node.getNodeInfo().substring("function_declaration:".length());
 	    	
 	    	if (table.containsKey(afterColon)) {
-		        System.err.println("Error: Function '" + afterColon + "' is multiple times in the same scope.");
+		        System.err.println("Error: Function '" + afterColon + "' is defined multiple times in the same scope.");
 		        System.exit(1);
 		    }
 	    	
